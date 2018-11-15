@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer');
 let fs = require('fs');
 const Papa = require('papaparse');
-let file = 'uuid_1.csv';
+let file = '/uuid_1.csv';
 let content = fs.readFileSync(file, "utf8");
 const SLM_URL = 'https://slm.netlify.com/properties/edit/'
 

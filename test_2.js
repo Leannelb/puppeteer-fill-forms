@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer');
 let fs = require('fs');
 const Papa = require('papaparse');
-let file = 'clean_uuid_address.csv';
+let file = 'uuid_1.csv';
 let content = fs.readFileSync(file, "utf8");
 const SLM_URL = 'https://slm.netlify.com/properties/edit/'
 
@@ -26,7 +26,6 @@ for (row of rows){
     for (r of row){
         if(a%2 == 0){
             let property_url = SLM_URL + r
-            // console.log(property_url);
             a++
             uuids.push(property_url)
             return uuids
@@ -35,15 +34,11 @@ for (row of rows){
             if(b%2 == 1 )
             {
                 let address = r
-                // console.log(address); 
                 addresses.push(address)
                 return addresses
             }
         b++
-        } 
-        console.log(uuids)
-        // print_r(address)
-        
+        }         
     }
 }
 
@@ -65,7 +60,6 @@ async function run() {
     const PASS_LOGIN_FIELD = 'body > app-root > app-login > div > div.content > form > div:nth-child(4) > input'
     const LOGIN_BUTTON = 'body > app-root > app-login > div > div.content > form > div.create-account.yellow-gold'
     const PROPERTIES_TAB ='body > app-root > div > div.page-container > app-sidebar > div > div > ul > li:nth-child(2) > a'
-    const TEST_PROPERTY_MANAGE = '#sample_1 > tbody > tr:nth-child(79) > td:nth-child(3) > button'
     const PROPERIES_ACTUAL_LOCATION_TAB = 'body > app-root > div > div.page-container > div > app-properties-edit > div > div > div > div > tab-property > div > div > ul > li:nth-child(6) > a'
     const DOOR_NO_FIELD = 'body > app-root > div > div.page-container > div > app-properties-locations > div > location-modal > div > div > div > div > div.modal-body > form > div > input'
 
@@ -82,18 +76,16 @@ async function run() {
     //LOGGED IN
     await page.waitFor(2000)   //THIS IS VITAL, WITHOUT THIS CLICK IS TOO QUICK
 
+    try { //without this try catch, could not access the properties tab
+        await page.click(PROPERTIES_TAB) 
+    } catch (error) {
+        console.log("Ahh shoot")
+    }
+
     for (current_url of uuids){
-
-        await page.goto(current_url, {waitUntil: 'networkidle2'})
-
-            try { //without this try catch, could not access the properties tab
-                await page.click(PROPERTIES_TAB) 
-            } catch (error) {
-                console.log("Ahh shoot")
-            }
             try {
                 await page.waitFor(5000) 
-                await page.click(TEST_PROPERTY_MANAGE)
+                await page.click(current_url)
             } catch (error) {
                 console.log("The element didn't appear.")
             }
@@ -102,6 +94,7 @@ async function run() {
                 await page.click(PROPERIES_ACTUAL_LOCATION_TAB)
             } catch (error) {
             console.log("darniooooo")
+
             }
             await page.click('#sample_1_option_1')
             await page.focus(DOOR_NO_FIELD)
@@ -109,7 +102,7 @@ async function run() {
             await page.waitFor(1000) 
             page.click('body > app-root > div > div.page-container > div > app-properties-locations > div > location-modal > div > div > div > div > div.modal-footer > button.btn.btn-primary', {delay: 10000})
             await page.waitFor(10000) 
-        
-        }
+
+    }
 }
 run();
