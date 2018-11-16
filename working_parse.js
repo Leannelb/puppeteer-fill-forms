@@ -25,27 +25,21 @@ for (row of rows){
        if(a%2 == 0){
             let property_url = SLM_URL + r
             uuids.push(property_url)
-            // console.log(property_url);
             a++
         } 
         if(a%2 == 1){
             if ( b%2 == 1){
                 let address = r
                 addresses.push(address)
-                // console.log(address);
             }
         } 
        b++
-        console.log(addresses)
     }
 }
 
-module.exports = { uuids};
-module.exports = { addresses};
+module.exports = { uuids };
+module.exports = { addresses };
 
-
-
-// run();
 
 
 
