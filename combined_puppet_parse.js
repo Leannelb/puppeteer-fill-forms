@@ -1,9 +1,50 @@
 const puppeteer = require('puppeteer');
 
-var { uuids } = require('./working_parse');
-var { addresses } = require('./working_parse');
+// var { uuids } = require('./working_parse');
+// var { addresses } = require('./working_parse');
 
-console.dir(addresses)
+// console.dir(addresses)
+
+let fs = require('fs');
+const Papa = require('papaparse');
+let file = 'uuid_1.csv';
+let content = fs.readFileSync(file, "utf8");
+const SLM_URL = 'https://slm.netlify.com/properties/edit/'
+
+let rows;
+Papa.parse(content, {
+    header: false,
+    delimiter: "\n",
+    complete: function(results) {
+        rows = results.data
+        return rows
+    }
+});
+
+let uuids = []
+let addresses = []
+
+for (row of rows){
+    a = 0
+    b = 0
+    for (r of row){
+       if(a%2 == 0){
+            let property_url = SLM_URL + r
+            uuids.push(property_url)
+            a++
+        } 
+        if(a%2 == 1){
+            if ( b%2 == 1){
+                let address = r
+                addresses.push(address)
+            }
+        } 
+       b++
+    }
+}
+
+
+
 
 async function run() {
     const browser = await puppeteer.launch({
@@ -36,15 +77,12 @@ async function run() {
     await page.click(LOGIN_BUTTON)
     await page.waitFor(2000) 
 
-    for (URL of uuids)
-    {
-        for (address of addresses)
-        {
-            await page.goto(URL)
+    for(var i = 0, b = 0; i < uuids.length, b < addresses.length; i++, b++){
+            await page.goto(uuids[i])
             await page.waitFor(5000) 
             
             try 
-{
+            {
                 await page.waitFor(2000) 
                 await page.click(PROPERIES_LOCATION_TAB)
             } catch (error) {
@@ -52,13 +90,12 @@ async function run() {
             }
             await page.click(ADD_NEW_PROPERIES_BUTTON)
             await page.focus(DOOR_NO_FIELD)
-            await page.keyboard.type(address)
+            await page.keyboard.type(addresses[b])
             await page.waitFor(1000)
             await page.click(SUBMIT_NEW_PROPERTY_BUTTON)
-        }
+            await page.waitFor(10000) 
     }
-    await page.waitFor(10000) 
-
+    browser.close();
 }
 
 run();

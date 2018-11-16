@@ -36,6 +36,7 @@ for (row of rows){
        b++
     }
 }
+ console.log(uuids)
 
 module.exports = { uuids };
 module.exports = { addresses };
