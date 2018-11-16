@@ -23,6 +23,7 @@ async function run() {
     for (row of rows)
     {
         a = 0
+        b = 0
         for (r of row)
         {
             if(a%2 == 0)
@@ -33,9 +34,13 @@ async function run() {
             } 
             if(a%2 == 1)
             {
-                let address = r
-                console.log(address);
+                if( b%2 == 1)
+                {
+                    let address = r
+                    console.log(address);
+                }
             } 
+            b++
         }
     }
 
