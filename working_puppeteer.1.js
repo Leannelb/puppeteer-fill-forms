@@ -30,7 +30,7 @@ async function run() {
 
   class DataFatcher {
     async getData() {
-      new Promise((resolve, reject) => {
+      return new Promise((resolve, reject) => {
         connection.query(
           "SELECT temp_old_reference FROM property",
           (error, dbResult) => {
@@ -38,9 +38,11 @@ async function run() {
               console.error("An error occurred while executing the query");
               resolve(null);
               // throw error;
+            } else {
+              console.log("data getched ok");
+              resolve(dbResult);
             }
-            console.log(dbResult);
-            resolve(dbResult);
+            // console.log(dbResult);
             // return slm_urls;
           }
         );
@@ -50,7 +52,7 @@ async function run() {
 
   var dbFetcher = new DataFatcher();
   dbFetcher.getData().then(result => {
-    console.log(slm_urls);
+    console.log(result);
   });
 
   //   const urls = [...]
