@@ -110,7 +110,11 @@ function insertDB(property, amenities) {
         console.error("An error occurred while executing the query");
         throw error;
       }
-      console.log(property_attributes);
+      // console.log(JSON.stringify(property_attributes));
+      for (var i = 0; i < property_attributes.length; i++) {
+        var prop_attribute = property_attributes[i];
+        console.log(prop_attribute.name);
+      }
     }
   );
 }
