@@ -18,21 +18,20 @@ connection.connect(err => {
 class DataFatcher {
   async getData() {
     return new Promise((resolve, reject) => {
-      connection.query(
-        "SELECT temp_old_reference FROM property",
-        (error, dbResult) => {
-          if (error) {
-            console.error("An error occurred while executing the query");
-            resolve(null);
-            // throw error;
-          } else {
-            // console.log("data getched ok");
-            resolve(dbResult);
-          }
-          // console.log(dbResult);
-          // return slm_urls;
-        }
-      );
+      connection.query("SELECT id, temp_old_reference FROM property", function(
+        err,
+        result,
+        fields
+      ) {
+        // if any error while executing above query, throw error
+        if (err) throw err;
+        // if there is no error, you have the result
+        // iterate for all the rows in result
+        Object.keys(result).forEach(function(key) {
+          var row = result[key];
+          //   console.log(row.temp_old_reference);
+        });
+      });
     });
   }
 }
@@ -46,14 +45,15 @@ dbFetcher.getData().then(result => {
 
 function looping() {
   // console.log("Hello");
-  openWeb(slm_urls);
+  // console.log(slm_urls);
+  openWeb(slm_urls[0]);
 }
 
-function openWeb(slm_urls) {
-  run(slm_urls);
+function openWeb(current_prop) {
+  run(current_prop);
 }
 
-async function run(slm_urls) {
+async function run(current_prop) {
   const browser = await puppeteer.launch({
     headless: false,
     slowMo: 10,
@@ -63,14 +63,12 @@ async function run(slm_urls) {
     devtools: true
   });
 
-  var current_prop_url = slm_urls[0].temp_old_reference;
-  console.log(current_prop_url);
-  // return current_prop_url;
   var page = await browser.newPage();
   await page.setViewport({ width: 2000, height: 2000 });
   const AMENITIES_PANNEL = "#block-4";
-
-  await page.goto(current_prop_url, { waitUntil: "networkidle2" });
+  let this_Url = current_prop[0].temp_old_reference;
+  console.log("current_prop[0].temp_old_reference");
+  await page.goto(this_Url, { waitUntil: "networkidle2" });
   await page.waitFor(2000);
   await page.focus(AMENITIES_PANNEL);
 
@@ -87,6 +85,6 @@ async function run(slm_urls) {
   );
 
   const amenities = amenitiesEven.concat(amenitiesOdd);
-  console.log("Did it, have the amenities");
+  console.log(amenities);
   browser.close();
 }
