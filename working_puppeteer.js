@@ -60,8 +60,6 @@ async function run(property) {
 
   var current_prop_url = property.temp_old_reference;
   var current_prop_id = property.id;
-  console.log(current_prop_id);
-  return;
   var page = await browser.newPage();
   await page.setViewport({ width: 2000, height: 2000 });
   const AMENITIES_PANNEL = "#block-4";
@@ -83,15 +81,36 @@ async function run(property) {
   );
 
   const amenities = amenitiesEven.concat(amenitiesOdd);
+  insertDB(property, amenities);
   browser.close();
-
-  // insertIntoDB(amenities, property);
 }
 
-// function insertIntoDB(property, amenities) {
-//   var url = property.temp_old_reference;
-//   var id = property.id;
-//   console.log(
-//     "property URL" + url + "property ID " + id + "amenities" + amenities
-//   );
-// }
+function insertDB(property, amenities) {
+  // var id = property.id;
+  // console.log(id);
+
+  const mysql = require("mysql");
+  const options = {
+    user: "root",
+    password: "root",
+    database: "slm_all_tables_2"
+  };
+  const connection = mysql.createConnection(options);
+  const attributes = [];
+  connection.connect(err => {
+    if (err) {
+      console.error("An error occurred while connecting to the DB");
+      throw err;
+    }
+  });
+  connection.query(
+    "SELECT name, id FROM property_attributes",
+    (error, property_attributes) => {
+      if (error) {
+        console.error("An error occurred while executing the query");
+        throw error;
+      }
+      console.log(property_attributes);
+    }
+  );
+}
