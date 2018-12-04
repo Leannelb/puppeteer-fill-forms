@@ -58,9 +58,10 @@ async function run(property) {
     devtools: true
   });
 
-  const util = require("util");
-  // console.log(util.inspect(property, { showHidden: false, depth: null }));
   var current_prop_url = property.temp_old_reference;
+  var current_prop_id = property.id;
+  console.log(current_prop_id);
+  return;
   var page = await browser.newPage();
   await page.setViewport({ width: 2000, height: 2000 });
   const AMENITIES_PANNEL = "#block-4";
