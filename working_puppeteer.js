@@ -1,11 +1,13 @@
 const puppeteer = require("puppeteer");
 
+//connection to DB info: i.e. OPTIONS
 const mysql = require("mysql");
 const options = {
   user: "root",
   password: "root",
   database: "slm_all_tables_2"
 };
+//create connection with options
 const connection = mysql.createConnection(options);
 var slm_urls = [];
 connection.connect(err => {
@@ -14,7 +16,7 @@ connection.connect(err => {
     throw err;
   }
 });
-
+//get all urls for each property
 class DataFatcher {
   async getData() {
     return new Promise((resolve, reject) => {
@@ -81,40 +83,60 @@ async function run(property) {
   );
 
   const amenities = amenitiesEven.concat(amenitiesOdd);
-  insertDB(property, amenities);
+  await insertDB(property, amenities);
   browser.close();
 }
 
-function insertDB(property, amenities) {
-  // var id = property.id;
-  // console.log(id);
-
+async function insertDB(property, amenities) {
   const mysql = require("mysql");
   const options = {
     user: "root",
     password: "root",
     database: "slm_all_tables_2"
   };
-  const connection = mysql.createConnection(options);
-  connection.connect(err => {
-    if (err) {
-      console.error("An error occurred while connecting to the DB");
-      throw err;
+  for (let amenityRow of amenities) {
+    let extitsInDB = await amenityExists(amenityRow);
+    if (extitsInDB == null) {
+      console.log("A DB error has occured");
+    } else if (extitsInDB == false) {
+      console.log(amenityRow + " It does not exist in db");
+    } else {
+      console.log(amenityRow + " exist in db");
     }
-  });
-  connection.query(
-    "SELECT name, id FROM property_attributes",
-    (error, db_attributes) => {
-      if (error) {
-        console.error("An error occurred while executing the query");
-        throw error;
-      }
-      // console.log(JSON.stringify(property_attributes));
-      // for(var i = 0, b = 0; i < uuids.length, b < addresses.length; i++, b++){
-      for (var i = 0; i < db_attributes.length; i++) {
-        console.log("loop");
-      }
-    }
-  );
-  // This is a change thos is another
+
+    console.log(extitsInDB);
+  }
 }
+
+async function amenityExists(amenityName) {
+  amenityName = amenityName.trim().toLowerCase();
+  return new Promise((resolve, reject) => {
+    const mysql = require("mysql");
+    const options = {
+      user: "root",
+      password: "root",
+      database: "slm_all_tables_2"
+    };
+    const connection = mysql.createConnection(options);
+    connection.connect(err => {
+      if (err) {
+        console.error("An error occurred while connecting to the DB");
+        throw err;
+      }
+    });
+    connection.query(
+      `SELECT COUNT(*) AS 'exists' FROM property_attributes WHERE TRIM(LOWER(name)) LIKE '%${amenityName}%'`,
+      (error, db_attributes) => {
+        if (error != null) {
+          resolve(null);
+        }
+        if (db_attributes[0].exists > 0) {
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      }
+    );
+  });
+}
+// This is a change thos is another
