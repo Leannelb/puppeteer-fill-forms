@@ -96,7 +96,6 @@ function insertDB(property, amenities) {
     database: "slm_all_tables_2"
   };
   const connection = mysql.createConnection(options);
-  const attributes = [];
   connection.connect(err => {
     if (err) {
       console.error("An error occurred while connecting to the DB");
@@ -105,16 +104,17 @@ function insertDB(property, amenities) {
   });
   connection.query(
     "SELECT name, id FROM property_attributes",
-    (error, property_attributes) => {
+    (error, db_attributes) => {
       if (error) {
         console.error("An error occurred while executing the query");
         throw error;
       }
       // console.log(JSON.stringify(property_attributes));
-      for (var i = 0; i < property_attributes.length; i++) {
-        var prop_attribute = property_attributes[i];
-        console.log(prop_attribute.name);
+      // for(var i = 0, b = 0; i < uuids.length, b < addresses.length; i++, b++){
+      for (var i = 0; i < db_attributes.length; i++) {
+        console.log("loop");
       }
     }
   );
+  // This is a change thos is another
 }

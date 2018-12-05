@@ -1,0 +1,25 @@
+{
+  "name": "slm_auto",
+  "version": "1.0.0",
+  "description": "",
+  "main": "working_puppeteer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Leannelb/puppeteer-fill-forms.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Leannelb/puppeteer-fill-forms/issues"
+  },
+  "homepage": "https://github.com/Leannelb/puppeteer-fill-forms#readme",
+  "devDependencies": {
+    "grunt": "^1.0.3",
+    "grunt-contrib-concat": "^1.0.1",
+    "grunt-contrib-watch": "^1.1.0",
+    "grunt-execute": "^0.2.2"
+  }
+}
