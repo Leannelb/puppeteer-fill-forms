@@ -1,5 +1,4 @@
 const puppeteer = require("puppeteer");
-
 //connection to DB info: i.e. OPTIONS
 const mysql = require("mysql");
 const options = {
@@ -41,7 +40,7 @@ dbFetcher.getData().then(result => {
   slm_urls = result;
   looping();
 });
-
+//steves code
 function looping() {
   openWeb(slm_urls[0]);
 }
@@ -89,34 +88,51 @@ async function run(property) {
 
 async function insertDB(property, amenities) {
   const mysql = require("mysql");
-  const options = {
-    user: "root",
-    password: "root",
-    database: "slm_all_tables_2"
-  };
   for (let amenityRow of amenities) {
     let extitsInDB = await amenityExists(amenityRow);
     if (extitsInDB == null) {
       console.log("A DB error has occured");
     } else if (extitsInDB == false) {
       console.log(amenityRow + " It does not exist in db");
+      // await noMatch();
     } else {
       console.log(amenityRow + " exist in db");
     }
 
-    console.log(extitsInDB);
+    // console.log(extitsInDB);
   }
 }
+
+// async function noMatch(amenityRow) {
+//   return new Promise((resolve, reject) => {
+//     const mysql = require("mysql");
+//     const connection = mysql.createConnection(options);
+//     connection.connect(err => {
+//       if (err) {
+//         console.error("An error occurred while connecting to the DB");
+//         throw err;
+//       }
+//     });
+//     connection.query(
+//       `SELECT COUNT(*) AS 'exists' FROM property_attributes WHERE TRIM(LOWER(name)) LIKE '%${amenityName}%'`,
+//       (error, db_attributes) => {
+//         if (error != null) {
+//           resolve(null);
+//         }
+//         if (db_attributes[0].exists > 0) {
+//           resolve(true);
+//         } else {
+//           resolve(false);
+//         }
+//       }
+//     );
+//   });
+// } //noMatch () end
 
 async function amenityExists(amenityName) {
   amenityName = amenityName.trim().toLowerCase();
   return new Promise((resolve, reject) => {
     const mysql = require("mysql");
-    const options = {
-      user: "root",
-      password: "root",
-      database: "slm_all_tables_2"
-    };
     const connection = mysql.createConnection(options);
     connection.connect(err => {
       if (err) {
@@ -139,4 +155,4 @@ async function amenityExists(amenityName) {
     );
   });
 }
-// This is a change thos is another
+// This is a change this is another
