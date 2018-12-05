@@ -82,52 +82,70 @@ async function run(property) {
   );
 
   const amenities = amenitiesEven.concat(amenitiesOdd);
-  await insertDB(property, amenities);
+  await checkDB(property, amenities);
   browser.close();
 }
 
-async function insertDB(property, amenities) {
-  const mysql = require("mysql");
+//insert amenity not there already, into DB
+async function checkDB(property, amenities) {
+  // const mysql = require("mysql");
   for (let amenityRow of amenities) {
-    let extitsInDB = await amenityExists(amenityRow);
-    if (extitsInDB == null) {
-      console.log("A DB error has occured");
-    } else if (extitsInDB == false) {
-      console.log(amenityRow + " It does not exist in db");
-      // await noMatch();
-    } else {
-      console.log(amenityRow + " exist in db");
-    }
+    createRecord(amenityRow, property);
 
+    // let extitsInDB = await amenityExists(amenityRow);
+    // if (extitsInDB == null) {
+    //   console.log("A DB error has occured");
+    // } else if (extitsInDB == false) {
+    //   // console.log(amenityRow + " It does not exist in db");
+    //   await createRecord(amenityRow);
+    //   continue;
+    // } else {
+    //   console.log(amenityRow + " exist in db");
+    // }
     // console.log(extitsInDB);
   }
 }
+// checkDB(property, amenities);
 
-// async function noMatch(amenityRow) {
-//   return new Promise((resolve, reject) => {
-//     const mysql = require("mysql");
-//     const connection = mysql.createConnection(options);
-//     connection.connect(err => {
-//       if (err) {
-//         console.error("An error occurred while connecting to the DB");
-//         throw err;
-//       }
-//     });
-//     connection.query(
-//       `SELECT COUNT(*) AS 'exists' FROM property_attributes WHERE TRIM(LOWER(name)) LIKE '%${amenityName}%'`,
-//       (error, db_attributes) => {
-//         if (error != null) {
-//           resolve(null);
-//         }
-//         if (db_attributes[0].exists > 0) {
-//           resolve(true);
-//         } else {
-//           resolve(false);
-//         }
-//       }
-//     );
-//   });
-// } //noMatch () end
+async function createRecord(amenityName, property) {
+  return new Promise((resolve, reject) => {
+    let currentAmenityID = null;
+    const mysql = require("mysql");
+    const connection = mysql.createConnection(options);
+    connection.connect(err => {
+      if (err) {
+        console.error("An error occurred while connecting to the DB");
+        throw err;
+      }
+    });
+    connection.query(
+      `SELECT id FROM property_attributes WHERE TRIM(LOWER(name)) LIKE '%${amenityName}%' limit 1 `,
+      (error, db_attributes) => {
+        if (error != null) {
+          // resolve(null);
+        }
+        if (db_attributes.length > 0) {
+          currentAmenityID = db_attributes[0].id;
+        } else {
+        }
+      }
+    );
+    if (currentAmenityID > 0) {
+    } else {
+      connection.query(
+        "INSERT INTO property_attributes SET ?",
+        { name: amenityRow },
+        function(error, results, fields) {
+          if (error) throw error;
+          currentAmenityID = results.insertId;
+          console.log(
+            "These are the results for : " + results + results.insertId
+          );
+        }
+      );
+    }
+  });
+} //createRecord () end
 
 async function amenityExists(amenityName) {
   amenityName = amenityName.trim().toLowerCase();
@@ -155,4 +173,3 @@ async function amenityExists(amenityName) {
     );
   });
 }
-// This is a change this is another
