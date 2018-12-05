@@ -15,7 +15,7 @@ connection.connect(err => {
     throw err;
   }
 });
-//get all urls for each property
+//get all urls for each property: temp_old_reference, id FROM property
 class DataFatcher {
   async getData() {
     return new Promise((resolve, reject) => {
@@ -34,21 +34,25 @@ class DataFatcher {
   }
 }
 
-//aarons code
+//runs DBFetcher to get: temp_old_reference, id FROM property
 var dbFetcher = new DataFatcher();
 dbFetcher.getData().then(result => {
   slm_urls = result;
+  //take off first array item, the call looping again
   looping();
 });
-//steves code
+
+//loop the first URL item in the array.
 function looping() {
   openWeb(slm_urls[0]);
 }
 
+//opens the URL and runs puppeteer script
 function openWeb(property) {
   run(property);
 }
 
+//runs puppeteer script
 async function run(property) {
   const browser = await puppeteer.launch({
     headless: false,
@@ -59,12 +63,11 @@ async function run(property) {
     devtools: true
   });
 
+  const AMENITIES_PANNEL = "#block-4";
   var current_prop_url = property.temp_old_reference;
-  var current_prop_id = property.id;
+  // var current_prop_id = property.id;
   var page = await browser.newPage();
   await page.setViewport({ width: 2000, height: 2000 });
-  const AMENITIES_PANNEL = "#block-4";
-
   await page.goto(current_prop_url, { waitUntil: "networkidle2" });
   await page.waitFor(2000);
   await page.focus(AMENITIES_PANNEL);
@@ -80,34 +83,22 @@ async function run(property) {
       attribute => attribute.innerHTML
     )
   );
-
+  //puppeteer grabs the amenitites of the page.
   const amenities = amenitiesEven.concat(amenitiesOdd);
   await checkDB(property, amenities);
   browser.close();
 }
 
-//insert amenity not there already, into DB
+//for each amenity of the current property, loop though and create a record for the ones that are not there
 async function checkDB(property, amenities) {
-  // const mysql = require("mysql");
   for (let amenityRow of amenities) {
     createRecord(amenityRow, property);
-
-    // let extitsInDB = await amenityExists(amenityRow);
-    // if (extitsInDB == null) {
-    //   console.log("A DB error has occured");
-    // } else if (extitsInDB == false) {
-    //   // console.log(amenityRow + " It does not exist in db");
-    //   await createRecord(amenityRow);
-    //   continue;
-    // } else {
-    //   console.log(amenityRow + " exist in db");
-    // }
-    // console.log(extitsInDB);
   }
 }
-// checkDB(property, amenities);
 
-async function createRecord(amenityName, property) {
+//open connection to DB
+//see if it exists
+async function createRecord(amenityRow, property) {
   return new Promise((resolve, reject) => {
     let currentAmenityID = null;
     const mysql = require("mysql");
@@ -119,7 +110,7 @@ async function createRecord(amenityName, property) {
       }
     });
     connection.query(
-      `SELECT id FROM property_attributes WHERE TRIM(LOWER(name)) LIKE '%${amenityName}%' limit 1 `,
+      `SELECT id FROM property_attributes WHERE TRIM(LOWER(name)) LIKE '%${amenityRow}%' limit 1 `,
       (error, db_attributes) => {
         if (error != null) {
           // resolve(null);
@@ -139,37 +130,13 @@ async function createRecord(amenityName, property) {
           if (error) throw error;
           currentAmenityID = results.insertId;
           console.log(
-            "These are the results for : " + results + results.insertId
+            "currentAmenityID " +
+              currentAmenityID +
+              " results.insertId" +
+              results.insertId
           );
         }
       );
     }
-  });
-} //createRecord () end
-
-async function amenityExists(amenityName) {
-  amenityName = amenityName.trim().toLowerCase();
-  return new Promise((resolve, reject) => {
-    const mysql = require("mysql");
-    const connection = mysql.createConnection(options);
-    connection.connect(err => {
-      if (err) {
-        console.error("An error occurred while connecting to the DB");
-        throw err;
-      }
-    });
-    connection.query(
-      `SELECT COUNT(*) AS 'exists' FROM property_attributes WHERE TRIM(LOWER(name)) LIKE '%${amenityName}%'`,
-      (error, db_attributes) => {
-        if (error != null) {
-          resolve(null);
-        }
-        if (db_attributes[0].exists > 0) {
-          resolve(true);
-        } else {
-          resolve(false);
-        }
-      }
-    );
   });
 }
